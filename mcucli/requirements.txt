@@ -1,0 +1,10 @@
+# MCU CLI - Python 依赖
+# 安装方式: pip install -r requirements.txt
+
+# ── 必需依赖 ──────────────────────────────────────────────────
+pyocd
+pyserial
+
+# ── 可选依赖 ──────────────────────────────────────────────────
+# stm32loader  # 用于 UART ISP 烧录
+# adafruit-ampy  # 用于 ESP32 MicroPython 上传

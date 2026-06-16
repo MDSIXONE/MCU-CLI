@@ -1,0 +1,16 @@
+display_name: MCU CLI
+short_description: 嵌入式开发工具集，支持烧录、串口监控、编译和调试
+default_prompt: 使用 MCU CLI 工具进行嵌入式开发，包括烧录固件、串口通信、代码编译和硬件调试
+name: mcucli
+description: MCU CLI 工具集，用于嵌入式开发、烧录、串口监控和调试。支持 STM32、ESP32、RP2040 等芯片。当用户需要烧录固件、串口通信、硬件调试、编译嵌入式代码时使用此技能。
+version: 1.0.0
+author: MiMoCode
+tags:
+  - embedded
+  - stm32
+  - esp32
+  - serial
+  - flashing
+  - debugging
+  - mcli
+  - hardware
