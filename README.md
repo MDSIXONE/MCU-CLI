@@ -4,7 +4,14 @@
 
 ## AI 使用指南
 
-**首先加载技能：**
+**首先将技能设置为本项目技能：**
+
+在项目的 `AGENTS.md` 或配置文件中添加：
+```markdown
+# 使用 .agent/skills/mcucli/ 目录下的技能
+```
+
+或者在会话开始时加载：
 ```python
 skill("mcucli")
 ```
