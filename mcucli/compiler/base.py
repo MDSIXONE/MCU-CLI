@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, ClassVar
 
-from config import (
+from mcucli.config import (
     ARM_AR,
     ARM_GCC,
     ARM_OBJCOPY,

@@ -4,10 +4,6 @@
 import sys
 import argparse
 import json
-from pathlib import Path
-
-# 添加当前目录到 Python 路径
-sys.path.insert(0, str(Path(__file__).parent))
 
 def main():
     parser = argparse.ArgumentParser(
@@ -18,6 +14,7 @@ def main():
   %(prog)s serial list                    # 列出串口
   %(prog)s serial read COM9               # 读取串口
   %(prog)s flash swd firmware.bin         # SWD 烧录
+  %(prog)s flash mspm0 firmware.out       # MSPM0 经 J-Link 烧录
   %(prog)s compile main.c                 # 编译代码
   %(prog)s connect --chip STM32F103C8     # 连接设备
         """
@@ -55,7 +52,18 @@ def main():
     flash_uart_parser = flash_subparsers.add_parser("uart", help="UART 烧录")
     flash_uart_parser.add_argument("bin_path", help="固件文件")
     flash_uart_parser.add_argument("--port", default="COM9", help="串口端口")
-    
+
+    # MSPM0 经 SEGGER J-Link 烧录（天猛星开发板）
+    flash_mspm0_parser = flash_subparsers.add_parser("mspm0", help="TI MSPM0 经 SEGGER J-Link 烧录")
+    flash_mspm0_parser.add_argument("path", help=".out/.bin 固件文件或 CCS 工程目录")
+    flash_mspm0_parser.add_argument("--device", default="", help="目标器件 (默认 MSPM0G3507)")
+    flash_mspm0_parser.add_argument("--interface", default="", help="调试接口 (默认 SWD)")
+    flash_mspm0_parser.add_argument("--speed", type=int, default=0, help="速率 kHz (默认 4000)")
+    flash_mspm0_parser.add_argument("--serial", default="", help="J-Link 序列号 (多探针时指定)")
+    flash_mspm0_parser.add_argument("--build", action="store_true", help="先编译 CCS 工程")
+    flash_mspm0_parser.add_argument("--verify", action="store_true", help="烧录后验证程序运行")
+    flash_mspm0_parser.add_argument("--dry-run", action="store_true", help="只打印命令不执行")
+
     flash_subparsers.add_parser("list", help="列出调试探针")
     
     # 编译命令
@@ -74,7 +82,7 @@ def main():
     # 连接命令
     connect_parser = subparsers.add_parser("connect", help="硬件连接")
     connect_parser.add_argument("--chip", default="STM32F103C8", help="芯片型号")
-    connect_parser.add_argument("--method", default="swd", choices=["swd", "uart"])
+    connect_parser.add_argument("--method", default="swd", choices=["swd", "uart", "mspm0"])
     
     # 寄存器命令
     reg_parser = subparsers.add_parser("regs", help="寄存器操作")
@@ -92,7 +100,7 @@ def main():
     args = parser.parse_args()
     
     if args.command == "serial":
-        from scripts.serial_monitor import list_serial_ports, read_serial, monitor_serial, send_serial
+        from mcucli.scripts.serial_monitor import list_serial_ports, read_serial, monitor_serial, send_serial
         
         if args.serial_command == "list":
             result = list_serial_ports()
@@ -111,22 +119,35 @@ def main():
             print(json.dumps(result, indent=2, ensure_ascii=False))
     
     elif args.command == "flash":
-        from scripts.flash_tool import flash_swd, flash_uart, list_debug_probes
-        
+        from mcucli.scripts.flash_tool import flash_swd, flash_uart, flash_mspm0, list_debug_probes, list_jlink_probes
+
         if args.flash_command == "list":
             result = list_debug_probes()
             print(json.dumps(result, indent=2, ensure_ascii=False))
-        
+
         elif args.flash_command == "swd":
             result = flash_swd(args.bin_path, args.chip)
             print(json.dumps(result, indent=2, ensure_ascii=False))
-        
+
         elif args.flash_command == "uart":
             result = flash_uart(args.bin_path, args.port)
             print(json.dumps(result, indent=2, ensure_ascii=False))
+
+        elif args.flash_command == "mspm0":
+            result = flash_mspm0(
+                args.path,
+                device=args.device,
+                interface=args.interface,
+                speed=args.speed,
+                serial=args.serial,
+                build=args.build,
+                verify=args.verify,
+                dry_run=args.dry_run,
+            )
+            print(json.dumps(result, indent=2, ensure_ascii=False))
     
     elif args.command == "compile":
-        from scripts.compile_tool import compile_stm32, compile_esp32, check_toolchain
+        from mcucli.scripts.compile_tool import compile_stm32, compile_esp32, check_toolchain
         
         if args.compile_command == "check":
             result = check_toolchain()
@@ -141,12 +162,16 @@ def main():
             print(json.dumps(result, indent=2, ensure_ascii=False))
     
     elif args.command == "connect":
-        from scripts.hardware_connect import connect_hardware
-        result = connect_hardware(args.chip, args.method)
+        from mcucli.scripts.hardware_connect import connect_hardware
+        # mspm0 方式下默认芯片切换为 MSPM0G3507（避免沿用 STM32 默认值）
+        chip = args.chip
+        if args.method == "mspm0" and chip == "STM32F103C8":
+            chip = "MSPM0G3507"
+        result = connect_hardware(chip, args.method)
         print(json.dumps(result, indent=2, ensure_ascii=False))
     
     elif args.command == "regs":
-        from scripts.hardware_connect import read_registers, write_register
+        from mcucli.scripts.hardware_connect import read_registers, write_register
         
         if args.reg_command == "read":
             result = read_registers()
@@ -161,7 +186,7 @@ def main():
                 print("无效的数值格式")
     
     elif args.command == "reset":
-        from scripts.hardware_connect import reset_device
+        from mcucli.scripts.hardware_connect import reset_device
         result = reset_device()
         print(json.dumps(result, indent=2, ensure_ascii=False))
     

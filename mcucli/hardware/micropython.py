@@ -533,7 +533,7 @@ def scan_micropython_boards(
     """Scan candidate serial ports and return all successfully probed MicroPython boards."""
 
     if ports is None:
-        from hardware.serial_mon import detect_serial_ports
+        from mcucli.hardware.serial_mon import detect_serial_ports
 
         ports = detect_serial_ports(verbose=False)
 

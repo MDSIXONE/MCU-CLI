@@ -63,3 +63,33 @@ UART_READ_TIMEOUT = 3  # 串口读取超时（秒）
 # ================= 默认目标芯片 =================
 DEFAULT_CHIP = "STM32F103C8T6"
 DEFAULT_CLOCK = "HSI_internal"
+
+# ================= TI MSPM0 烧录（SEGGER J-Link）=================
+# 通用框架默认值：仅保留芯片级通用配置，不含任何特定板/特定用户的硬件信息
+# （探针序列号、特定工程路径、个人安装路径等由调用方传入或放在 Project/<项目>/ 下）
+#
+# J-Link Commander 命令序列：r / h / loadfile "<.out>" / r / g / exit
+# MSPM0 flash 基址为 0x00000000（J-Link loadfile 自动解析 .out 段地址，无需手动指定）
+MSPM0_DEFAULT_DEVICE = "MSPM0G3507"          # MCU 型号（芯片级通用）
+MSPM0_DEFAULT_INTERFACE = "SWD"              # J-Link 调试接口（通用）
+MSPM0_DEFAULT_SPEED = 4000                   # kHz（MSPM0 通用稳定速率）
+# 注意：不设 MSPM0_DEFAULT_SERIAL。探针序列号由调用方传入，
+# 或运行时通过 JLink.exe ShowEmuList 枚举在线探针自动选择（见 flash_mspm0 auto-fallback）。
+
+# SEGGER J-Link 安装位置探测顺序（resolve_jlink_path 按此查找）：
+# 1) 注册表 HKLM/HKCU\SOFTWARE\SEGGER\J-Link\InstallPath 下的 JLink.exe
+# 2) PATH 中的 JLink.exe
+# 3) 下列标准安装目录兜底（仅含 SEGGER 官方默认安装路径，不含任何个人路径）
+JLINK_INSTALL_CANDIDATES = [
+    r"C:\Program Files\SEGGER\JLink\JLink.exe",
+    r"C:\Program Files (x86)\SEGGER\JLink\JLink.exe",
+]
+
+# TI Code Composer Studio 构建工具（gmake）探测顺序：
+# 1) PATH 中的 gmake.exe
+# 2) 下列标准 CCS 安装目录兜底（C:\ti 下按版本号通配，不含任何个人路径）
+CCS_GMAKE_CANDIDATES = [
+    r"C:\ti\ccs\ccs\utils\bin\gmake.exe",
+]
+# 注：CCS 工作区/工程路径属于项目专属信息，不在通用 config 中。
+# 各 MSPM0 项目的工程路径放在 Project/<项目名>/board.json 或由调用方传入。

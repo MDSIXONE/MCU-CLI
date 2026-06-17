@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcucli"
+version = "0.1.0"
+description = "嵌入式开发工具集，支持 STM32、ESP32、RP2040、TI MSPM0 等芯片的烧录、串口监控、编译和调试"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "MCU-CLI Contributors" }]
+keywords = ["mcu", "embedded", "flash", "stm32", "esp32", "mspm0", "jlink", "pyocd", "serial"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Embedded Systems",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "pyocd>=0.35",
+    "pyserial>=3.5",
+]
+
+[project.optional-dependencies]
+uart = ["stm32loader>=0.5"]
+esp32 = ["adafruit-ampy>=1.1"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+mcucli = "mcucli.mcucli:main"
+
+[project.urls]
+Homepage = "https://github.com/MCU-CLI/MCU-CLI"
+
+[tool.setuptools.packages.find]
+include = ["mcucli*"]
+exclude = ["tests*", "Project*", ".agent*"]
+
+[tool.setuptools.package-data]
+mcucli = ["*.md", "*.txt"]

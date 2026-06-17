@@ -27,6 +27,8 @@ wheels/
 venv/
 env/
 ENV/
+.venv/
+.venv-*/
 
 # IDE
 .vscode/
@@ -43,6 +45,9 @@ Thumbs.db
 workspace/
 *.log
 *.tmp
+
+# 个人开发记录（含实测硬件信息，不进公开仓库；TASK_TEMPLATE.md 模板保留）
+Project/**/TASK.md
 
 # 临时文件
 *.md.bak

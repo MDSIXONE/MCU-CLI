@@ -42,6 +42,37 @@ python scripts/flash_tool.py flash-swd firmware.bin --chip STM32F103C8
 python scripts/flash_tool.py flash-uart firmware.bin --port COM9
 ```
 
+### TI MSPM0 经 SEGGER J-Link 烧录
+```bash
+# 直接烧录 .out 固件
+python mcucli.py flash mspm0 firmware.out
+
+# 指定 CCS 工程目录，先编译再烧录并验证运行
+python mcucli.py flash mspm0 "<ccs_project_dir>" --build --verify
+
+# 多探针时指定序列号（通常可省略，见下方 auto-fallback）
+python mcucli.py flash mspm0 firmware.out --serial <SN>
+
+# 只打印命令不执行（验证流程）
+python mcucli.py flash mspm0 firmware.out --dry-run
+
+# 自定义器件/接口/速率
+python mcucli.py flash mspm0 firmware.out --device MSPM0G3507 --interface SWD --speed 4000
+```
+
+> **开源约定**：通用框架不内置任何探针序列号/工程路径。`--serial` 省略时走 auto-fallback；
+> 项目专属信息（序列号、CCS 工程路径等）放 `Project/<项目>/board.json`，由该项目的 `flash.py` 读取传入。
+
+> **auto-fallback**：`flash mspm0` 未传 `--serial` 时，直接枚举当前 USB 上的 J-Link 探针
+> （`JLink.exe ShowEmuList`）自动选择；若传了 `--serial` 但该探针不在线
+> （"Connecting to J-Link ...FAILED"），也会自动枚举在线探针重试一次，
+> 结果带 `fallback`/`serial` 字段说明实际所用探针。
+
+### 列出 J-Link 探针（实时枚举 USB）
+```bash
+python scripts/flash_tool.py list-jlink
+```
+
 ### 读取寄存器
 ```bash
 python scripts/flash_tool.py read-regs
@@ -126,13 +157,18 @@ result = monitor_serial("COM9", duration=10, keyword="ERROR")
 
 ### 烧录工具
 ```python
-from scripts.flash_tool import flash_swd, flash_uart, read_registers
+from scripts.flash_tool import flash_swd, flash_uart, flash_mspm0, read_registers
 
 # SWD 烧录
 result = flash_swd("firmware.bin", chip="STM32F103C8")
 
 # UART 烧录
 result = flash_uart("firmware.bin", port="COM9")
+
+# TI MSPM0 经 J-Link 烧录（path 可为 .out 文件或 CCS 工程目录）
+result = flash_mspm0("firmware.out")
+result = flash_mspm0("project_dir", build=True, verify=True, dry_run=False)
+# 可选参数: device, interface, speed, serial
 
 # 读取寄存器
 result = read_registers(["PC", "SP", "SCB_CFSR"])

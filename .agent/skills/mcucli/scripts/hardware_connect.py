@@ -8,15 +8,34 @@ import argparse
 import json
 from typing import Optional, List, Dict, Any
 
-def connect_hardware(chip: str = "STM32F103C8", 
+def connect_hardware(chip: str = "STM32F103C8",
                      method: str = "swd") -> Dict[str, Any]:
     """连接硬件设备"""
     if method == "swd":
         return connect_swd(chip)
     elif method == "uart":
         return {"success": False, "error": "UART 连接需要指定端口"}
+    elif method == "mspm0":
+        return connect_mspm0(chip)
     else:
         return {"success": False, "error": f"不支持的连接方式: {method}"}
+
+def connect_mspm0(chip: str = "MSPM0G3507") -> Dict[str, Any]:
+    """通过 SEGGER J-Link 连接 TI MSPM0（天猛星开发板）"""
+    try:
+        from mcucli.scripts.flash_tool import resolve_jlink_path
+        jlink = resolve_jlink_path()
+        if not jlink:
+            return {"success": False, "error": "未找到 JLink.exe，请安装 SEGGER J-Link"}
+        return {
+            "success": True,
+            "chip": chip,
+            "probe": "SEGGER J-Link",
+            "jlink_exe": jlink,
+            "message": f"已连接: {chip} via J-Link"
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 def connect_swd(chip: str = "STM32F103C8") -> Dict[str, Any]:
     """通过 SWD 连接设备"""

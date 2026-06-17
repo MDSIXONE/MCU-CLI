@@ -1,0 +1,31 @@
+{
+  "board": "LCSC Tianmengxing MSPM0G3507",
+  "mcu": "MSPM0G3507",
+  "interface": "SWD",
+  "speed_khz": 4000,
+  "led": {
+    "port": "GPIOB",
+    "pin": 22,
+    "iomux": "IOMUX_PINCM50"
+  },
+  "uart": {
+    "instance": "UART0",
+    "tx": { "port": "GPIOA", "pin": 10, "iomux": "IOMUX_PINCM21" },
+    "rx": { "port": "GPIOA", "pin": 11, "iomux": "IOMUX_PINCM22" },
+    "baud": 115200
+  },
+  "probe": {
+    "type": "jlink",
+    "serial": "",
+    "note": "留空时 flash_mspm0 会自动枚举在线 J-Link 探针（auto-fallback）。多探针环境可填入本机探针序列号。"
+  },
+  "ccs_project": "",
+  "ccs_project_note": "填入本机 CCS 工程绝对路径（含 .out 的 Debug 子目录由 flash_mspm0 自动定位），或运行 flash.py 时作为位置参数传入。",
+  "sources": [
+    "empty_non_sysconfig.c",
+    "ti_msp_dl_config.c",
+    "ti_msp_dl_config.h",
+    "startup_mspm0g350x_ticlang.c",
+    "mspm0g3507.cmd"
+  ]
+}
